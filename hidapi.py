@@ -159,7 +159,7 @@ class Device(object):
         if not blocking:
             hidapi.hid_set_nonblocking(self._device, 1)
 
-    def write(self, data, report_id=0x0):
+    def write(self, data, report_id=b'\0'):
         """ Write an Output report to a HID device.
 
         This will send the data on the first OUT endpoint, if one exists. If it

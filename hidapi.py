@@ -49,10 +49,14 @@ int hid_get_indexed_string(hid_device *device, int string_index,
 const wchar_t* hid_error(hid_device *device);
 """)
 
-try:
-    hidapi = ffi.dlopen('hidapi-libusb')
-except OSError:
-    hidapi = ffi.dlopen('hidapi-hidraw')
+for lib in ('hidapi-libusb', 'hidapi-hidraw', 'hidapi'):
+    try:
+        hidapi = ffi.dlopen(lib)
+        break
+    except OSError:
+        pass
+else:
+    raise OSError("Could not find any hidapi library")
 
 if hidapi.hid_init() == -1:
     raise OSError("Failed to initialize hidapi")
@@ -155,7 +159,7 @@ class Device(object):
         if not blocking:
             hidapi.hid_set_nonblocking(self._device, 1)
 
-    def write(self, data, report_id=0x0):
+    def write(self, data, report_id=b'\0'):
         """ Write an Output report to a HID device.
 
         This will send the data on the first OUT endpoint, if one exists. If it

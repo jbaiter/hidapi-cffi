@@ -146,7 +146,8 @@ class Device(object):
         elif path is not None:
             self._device = hidapi.hid_open_path(path)
         elif not (vendor_id is None or product_id is None):
-            self._device = hidapi.hid_open(vendor_id, product_id, serial_number)
+            self._device = hidapi.hid_open(vendor_id, product_id,
+                                           serial_number)
         else:
             raise ValueError("Must provide either a DeviceInfo object, 'path' "
                              "or 'vendor_id' and 'product_id'.")
@@ -154,6 +155,10 @@ class Device(object):
             raise IOError("Could not open connection to device.")
         if not blocking:
             hidapi.hid_set_nonblocking(self._device, 1)
+
+    def __del__(self):
+        if self._device is not None:
+            self.close()
 
     def write(self, data, report_id=0x0):
         """ Write an Output report to a HID device.
@@ -167,6 +172,7 @@ class Device(object):
         :param report_id:   The Report ID to write to (default: 0x0)
 
         """
+        self._check_device_status()
         bufp = ffi.new("unsigned char[]", len(data)+1)
         buf = ffi.buffer(bufp, len(data)+1)
         buf[0] = report_id
@@ -194,6 +200,7 @@ class Device(object):
         :param blocking:    Block until data is available
 
         """
+        self._check_device_status()
         bufp = ffi.new("unsigned char[]", length)
         if not timeout_ms and blocking:
             timeout_ms = -1
@@ -217,6 +224,7 @@ class Device(object):
         :rtype:     unicode
 
         """
+        self._check_device_status()
         str_p = ffi.new("wchar_t[]", 255)
         rv = hidapi.hid_get_manufacturer_string(self._device, str_p, 255)
         if rv == -1:
@@ -231,6 +239,7 @@ class Device(object):
         :rtype:     unicode
 
         """
+        self._check_device_status()
         str_p = ffi.new("wchar_t[]", 255)
         rv = hidapi.hid_get_product_string(self._device, str_p, 255)
         if rv == -1:
@@ -245,6 +254,7 @@ class Device(object):
         :rtype:     unicode
 
         """
+        self._check_device_status()
         str_p = ffi.new("wchar_t[]", 255)
         rv = hidapi.hid_get_serial_number_string(self._device, str_p, 255)
         if rv == -1:
@@ -264,6 +274,7 @@ class Device(object):
         :type report_id:    int
 
         """
+        self._check_device_status()
         bufp = ffi.new("unsigned char[]", len(data)+1)
         buf = ffi.buffer(bufp, len(data)+1)
         buf[0] = report_id
@@ -282,6 +293,7 @@ class Device(object):
         :rtype:             str/bytes
 
         """
+        self._check_device_status()
         bufp = ffi.new("unsigned char[]", length+1)
         buf = ffi.buffer(bufp, length+1)
         buf[0] = report_id
@@ -300,6 +312,7 @@ class Device(object):
         :rtype:     unicode
 
         """
+        self._check_device_status()
         bufp = ffi.new("wchar_t*")
         rv = hidapi.hid_get_indexed_string(self._device, idx, bufp, 65536)
         if rv == -1:
@@ -308,9 +321,23 @@ class Device(object):
                           .format(idx, self._get_last_error_string()))
         return ffi.buffer(bufp, 65536)[:].strip()
 
+    def close(self):
+        """ Close connection to HID device.
+
+        Automatically run when a Device object is garbage-collected, though
+        manual invocation is recommended.
+        """
+        self._check_device_status()
+        hidapi.hid_close(self._device)
+        self._device = None
+
     def _get_last_error_string(self):
         errstr_p = ffi.new("wchar_t*")
         rv = hidapi.hid_error(self._device)
         if rv is ffi.NULL:
             return None
         return ffi.string(errstr_p)
+
+    def _check_device_status(self):
+        if self._device is None:
+            raise OSError("Trying to perform action on closed device.")

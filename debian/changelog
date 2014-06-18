@@ -1,0 +1,5 @@
+python-hidapi-cffi (0.2.1-1) UNRELEASED; urgency=medium
+
+  * Initial release.
+
+ -- Johannes Baiter <johannes.baiter@gmail.com>  Wed, 18 Jun 2014 14:35:29 +0200

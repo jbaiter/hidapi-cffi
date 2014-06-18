@@ -1,0 +1,28 @@
+Source: python-hidapi-cffi
+Maintainer: Johannes Baiter <johannes.baiter@gmail.com>
+Section: python
+Priority: optional
+Build-Depends:
+ debhelper (>= 9),
+ dh-python,
+ python-all-dev,
+ python3-all-dev,
+ python-setuptools,
+ python3-setuptools,
+ python-cffi (>= 0.8),
+ python3-cffi (>= 0.8),
+ python-pytest,
+ python3-pytest,
+Standards-Version: 3.9.5
+
+Package: python-hidapi-cffi
+Architecture: any
+Depends: ${misc:Depends}, ${python:Depends}, ${shlibs:Depends}, libhidapi-libusb0
+Description: Python bindings for libhidapi using CFFI.
+
+Package: python3-hidapi-cffi
+Architecture: any
+Depends: ${misc:Depends}, ${python:Depends}, ${shlibs:Depends}, libhidapi-libusb0
+Description: Python bindings for libhidapi using CFFI.
+ .
+ This package contains the Python 3 version of python-hidapi-cffi.

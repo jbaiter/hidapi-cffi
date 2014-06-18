@@ -151,7 +151,7 @@ class Device(object):
         else:
             raise ValueError("Must provide either a DeviceInfo object, 'path' "
                              "or 'vendor_id' and 'product_id'.")
-        if self._device is ffi.NULL:
+        if self._device == ffi.NULL:
             raise IOError("Could not open connection to device.")
         if not blocking:
             hidapi.hid_set_nonblocking(self._device, 1)

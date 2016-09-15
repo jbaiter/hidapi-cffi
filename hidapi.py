@@ -283,7 +283,7 @@ class Device(object):
         buf = ffi.buffer(bufp, len(data)+1)
         buf[0] = report_id
         buf[1:] = data
-        rv = hidapi.hid_send_feature_report(self._device, bufp, len(data))
+        rv = hidapi.hid_send_feature_report(self._device, bufp, len(bufp))
         if rv == -1:
             raise IOError("Failed to send feature report to HID device: {0}"
                           .format(self._get_last_error_string()))

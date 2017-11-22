@@ -151,7 +151,7 @@ class Device(object):
             self._device = hidapi.hid_open_path(path)
         elif not (vendor_id is None or product_id is None):
             self._device = hidapi.hid_open(vendor_id, product_id,
-                                           serial_number)
+                                           serial_number or ffi.NULL)
         else:
             raise ValueError("Must provide either a DeviceInfo object, 'path' "
                              "or 'vendor_id' and 'product_id'.")
